@@ -22,19 +22,26 @@ import os
 LETTER = "A"
 
 
+def write_entry(letter: str, out_dir: str) -> str:
+    """Write exactly one byte and read it back; return the verified text."""
+    path = os.path.join(out_dir, "entry.txt")
+    # Exactly one byte: newline="" so no trailing newline is added.
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(letter)
+    # Verify the written artifact: the gate refuses anything but exactly
+    # one character, so read it back and fail loudly rather than submit
+    # a bad file.
+    with open(path, "r", encoding="utf-8", newline="") as f:
+        written = f.read()
+    assert written == letter and len(written) == 1, "entry.txt must hold exactly one letter"
+    return written
+
+
 def main() -> None:
     assert len(LETTER) == 1 and LETTER in ("A", "B"), "entry must be A or B"
     out_dir = os.environ.get("OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
-    # Exactly one byte: newline="" so no trailing newline is added.
-    with open(os.path.join(out_dir, "entry.txt"), "w", encoding="utf-8", newline="") as f:
-        f.write(LETTER)
-    # Verify the written artifact: the gate refuses anything but exactly
-    # one character, so read it back and fail loudly rather than submit
-    # a bad file.
-    with open(os.path.join(out_dir, "entry.txt"), "r", encoding="utf-8", newline="") as f:
-        written = f.read()
-    assert written == LETTER and len(written) == 1, "entry.txt must hold exactly one letter"
+    write_entry(LETTER, out_dir)
 
 
 if __name__ == "__main__":
